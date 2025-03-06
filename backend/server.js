@@ -22,6 +22,9 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
 
+// Routes
+app.use("/auth", require("./routes/auth"));
+
 
 // Start server
 const PORT = process.env.PORT || 5000;
