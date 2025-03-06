@@ -10,16 +10,9 @@ const cors = require("cors");
 const app = express();
 
 // Cors Middleware
-app.use(
-    cors({
-      origin: process.env.NODE_ENV === "production"
-        ? "http://localhost:3000" // Your frontend's production URL
-        : "http://localhost:3000", // Development URL
-      credentials: true, // Allow credentials
-    })
-);
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
 
 
 
