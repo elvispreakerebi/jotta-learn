@@ -3,18 +3,21 @@ import React from "react";
 interface YoutubeVideoCardProps {
   thumbnail: string;
   title: string;
-  onClick: () => void; // Callback for when the card is clicked
+  onClick: () => void;
 }
 
 const YoutubeVideoCard: React.FC<YoutubeVideoCardProps> = ({ thumbnail, title, onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+      className="bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+      style={{ cursor: "pointer", overflow: "hidden" }}
     >
-      <img src={thumbnail} alt={title} className="w-full h-48 object-cover" />
+      <img src={thumbnail} alt={title} style={{ width: "100%", height: "12rem", objectFit: "cover" }} />
       <div className="p-4">
-        <h4 className="text-md font-medium text-gray-800 line-clamp-2">{title}</h4>
+        <h4 className="text-md font-medium text-gray-800" style={{ display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+          {title}
+        </h4>
       </div>
     </div>
   );

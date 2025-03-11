@@ -56,7 +56,7 @@ const Dashboard = () => {
     return () => {
       if (pollingInterval) clearInterval(pollingInterval);
     };
-  }, [pollingInterval]);
+  }, [pollingInterval, navigate]);
 
   const fetchSavedVideos = async () => {
     try {
@@ -89,7 +89,6 @@ const Dashboard = () => {
 
   const handleGenerate = async () => {
     if (isGenerating) {
-      // Cancel generation process
       setIsGenerating(false);
       setProgress(0);
       setYoutubeUrl("");
@@ -108,11 +107,10 @@ const Dashboard = () => {
         return;
       }
   
-      // Check if the video already has flashcards
       const videoExists = await checkVideoExists(videoId);
       if (videoExists) {
         toast.error("Flashcards already exist for this video.");
-        setYoutubeUrl(""); // Clear the input field
+        setYoutubeUrl("");
         setIsGenerating(false);
         return;
       }
@@ -120,7 +118,6 @@ const Dashboard = () => {
       const response = await axios.post("/youtube/generate", { videoId }, { withCredentials: true });
       toast.success(response.data.message);
   
-      // Start polling for status and update progress
       const interval = setInterval(async () => {
         const videoExists = await checkVideoExists(videoId);
         if (videoExists) {
@@ -132,7 +129,6 @@ const Dashboard = () => {
           toast.success("Flashcards have been saved!");
           setYoutubeUrl("");
         } else {
-          // Simulate progress only while the backend is processing
           setProgress((prev) => Math.min(prev + 1, 99));
         }
       }, 2000);
@@ -149,12 +145,10 @@ const Dashboard = () => {
       setProgress(0);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Top Navigation Section */}
-      <div className="w-full fixed top-0 bg-white shadow-sm z-10">
+      <div className="w-full fixed top-0 bg-white shadow-sm" style={{ zIndex: 10 }}>
         <div className="flex justify-between items-center px-16 py-3">
           <h1 className="text-2xl font-bold text-gray-800">Jotta</h1>
           <div className="flex items-center space-x-4">
@@ -168,7 +162,7 @@ const Dashboard = () => {
                 <p className="text-gray-800 hidden sm:block">{user.name}</p>
                 <Menu as="div" className="relative">
                   <Menu.Button>
-                    <ChevronDownIcon className="w-6 h-6 text-gray-600 cursor-pointer" />
+                    <ChevronDownIcon className="w-6 h-6 text-gray-600" style={{ cursor: "pointer" }} />
                   </Menu.Button>
                   <Transition
                     enter="transition ease-out duration-100"
@@ -178,14 +172,12 @@ const Dashboard = () => {
                     leaveFrom="opacity-100 scale-100"
                     leaveTo="opacity-0 scale-95"
                   >
-                    <Menu.Items className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <Menu.Items className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item>
                         {({ active }) => (
                           <button
                             onClick={handleLogout}
-                            className={`${
-                              active ? "bg-gray-100" : ""
-                            } flex items-center w-full px-4 py-2 text-gray-800 text-sm`}
+                            className={`flex items-center w-full px-4 py-2 text-gray-800 text-sm ${active ? "bg-gray-100" : ""}`}
                           >
                             <LogOutIcon className="w-5 h-5 mr-2 text-gray-600" />
                             Log Out
@@ -201,13 +193,13 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        <div className="py-4 px-16 max-w-2xl w-full mx-auto">
+        <div className="py-4 px-16" style={{ maxWidth: "42rem", margin: "0 auto" }}>
           <p className="text-gray-700 mb-4 text-center">
             {savedVideos.length > 0
               ? "Enter a YouTube video link to generate more flashcards or view your previously generated videos below."
               : "Enter a YouTube video link to get started with your first flashcards."}
           </p>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0 max-w-2xl">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0" style={{ maxWidth: "42rem" }}>
             <input
               type="text"
               placeholder="Enter YouTube video URL"
@@ -217,9 +209,7 @@ const Dashboard = () => {
             />
             <button
               onClick={handleGenerate}
-              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-white ${
-                isGenerating ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"
-              }`}
+              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-white ${isGenerating ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700"}`}
             >
               {isGenerating ? "Cancel" : "Generate"}
             </button>
@@ -227,7 +217,7 @@ const Dashboard = () => {
           {isGenerating && (
             <div className="w-full bg-gray-200 rounded-lg mt-4">
               <div
-                className="bg-blue-600 text-xs font-medium text-white text-center p-1 leading-none rounded-lg"
+                className="bg-blue-600 text-xs font-medium text-white text-center p-1 rounded-lg"
                 style={{ width: `${progress}%` }}
               >
                 {progress}%
@@ -237,10 +227,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Video Cards Section */}
       <div className="px-6 py-72 sm:py-56">
         {isLoading ? (
-          <div className="flex justify-center items-center h-32">
+          <div className="flex justify-center items-center" style={{ height: "8rem" }}>
             <div className="w-12 h-12 border-4 border-blue-500 border-dotted rounded-full animate-spin"></div>
           </div>
         ) : savedVideos.length > 0 ? (
