@@ -34,7 +34,7 @@ router.get(
       // const baseUrl = `${req.protocol}://${req.get("host")}`;
 
       // Redirect with flash messages
-      res.redirect(`http://localhost:3001/dashboard?message=${encodeURIComponent(req.flash("success"))}`);
+      res.redirect(`http://localhost:3000/dashboard?message=${encodeURIComponent(req.flash("success"))}`);
     } catch (err) {
       console.error(err);
       res.redirect("/login");
