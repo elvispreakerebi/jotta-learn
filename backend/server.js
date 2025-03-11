@@ -31,6 +31,7 @@ app.use(passport.session());
 
 // Routes
 app.use("/auth", require("./routes/auth"));
+app.use("/youtube", require("./routes/youtube"));
 
 
 // Start server
