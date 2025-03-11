@@ -37,9 +37,10 @@ app.use(
         mongoUrl: process.env.MONGO_URI, // Your MongoDB connection string
       }),
       cookie: {
-        secure: process.env.NODE_ENV === "production", // Secure cookies only in production
+        secure: false, // Set to false in development
         httpOnly: true, // Prevent client-side access to the cookie
-        sameSite: 'none', // Adjust for environment
+        sameSite: 'lax', // Use 'lax' for development
+        maxAge: 24 * 60 * 60 * 1000 // 24 hours
       },
     })
 );

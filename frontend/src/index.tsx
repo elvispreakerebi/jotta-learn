@@ -10,7 +10,7 @@ axios.defaults.baseURL = "http://localhost:5000";
 //   process.env.NODE_ENV === "production"
 //     ? "https://jotta.onrender.com" // In production, Axios will default to the same domain as the frontend
 //     : "http://localhost:3000"; // Use your backend's development URL
-// axios.defaults.withCredentials = true; // Include credentials for all requests
+axios.defaults.withCredentials = true; // Include credentials for all requests
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
