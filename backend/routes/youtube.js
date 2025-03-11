@@ -1,5 +1,5 @@
+// Remove Redis and BullMQ related imports
 const express = require("express");
-const { Queue, Worker, QueueEvents } = require("bullmq");
 const axios = require("axios");
 const YouTubeVideo = require("../models/YoutubeVideo");
 const ensureAuthenticated = require("../middleware/ensureAuthenticated");
@@ -8,212 +8,71 @@ const fs = require("fs");
 const youtubedl = require("youtube-dl-exec");
 const ffmpeg = require("fluent-ffmpeg");
 
-const router = express.Router();
+// Add new JobQueue model
+const mongoose = require('mongoose');
 
+// Define the JobQueue Schema
+const jobQueueSchema = new mongoose.Schema({
+  videoId: String,
+  userId: String,
+  status: {
+    type: String,
+    enum: ['pending', 'processing', 'completed', 'failed'],
+    default: 'pending'
+  },
+  result: mongoose.Schema.Types.Mixed,
+  error: String,
+  createdAt: { type: Date, default: Date.now }
+});
+
+const JobQueue = mongoose.model('JobQueue', jobQueueSchema);
+
+// Remove Redis connection setup and queue creation
+const router = express.Router();
 const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY;
 
-//Redis connection options
-const Redis = require("ioredis");
-const redis = new Redis(process.env.REDIS_URL);
-const connection = { redis };
-
-// Create the queue and events tracker
-const flashcardsQueue = new Queue("flashcardsQueue", { connection });
-const queueEvents = new QueueEvents("flashcardsQueue", { connection });
-
-// Listen for job completion and failure
-queueEvents.on("completed", (jobId, result) => {
-  console.log(`[QUEUE] Job ${jobId} completed with result: ${result}`);
-});
-queueEvents.on("failed", (jobId, failedReason) => {
-  console.error(`[QUEUE] Job ${jobId} failed with reason: ${failedReason}`);
-});
-
-// Helper function to fetch YouTube video details
-const fetchVideoDetails = async (videoId) => {
-  const apiUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-
-  console.log(`[FETCH] Fetching video details for video ID: ${videoId}`);
+// Create a function to process jobs
+async function processJob(job) {
   try {
-    const response = await axios.get(apiUrl);
-    const { title, thumbnail_url: thumbnail } = response.data;
-    console.log(`[FETCH] Fetched details: Title="${title}", Thumbnail="${thumbnail}"`);
-    return { title, thumbnail };
+    const { videoId, userId } = job;
+    let compressedAudioPath;
+
+    console.log(`[WORKER] Processing job for video ID: ${videoId}, User ID: ${userId}`);
+    const { title, thumbnail } = await fetchVideoDetails(videoId);
+    compressedAudioPath = await downloadAndCompressAudio(videoId);
+
+    const chapters = await transcribeAndSummarize(compressedAudioPath);
+    console.log("[WORKER] Chapters received:", chapters);
+
+    const flashcards = chapters.map((chapter) => ({
+      content: chapter.content,
+      startTime: chapter.startTime,
+      endTime: chapter.endTime,
+    }));
+
+    const video = new YouTubeVideo({ videoId, userId, title, thumbnail, flashcards });
+    await video.save();
+
+    // Update job status
+    await JobQueue.findByIdAndUpdate(job._id, {
+      status: 'completed',
+      result: { videoId, flashcards }
+    });
+
+    // Cleanup
+    if (compressedAudioPath && fs.existsSync(compressedAudioPath)) {
+      fs.unlinkSync(compressedAudioPath);
+    }
   } catch (error) {
-    console.error(`[FETCH] Failed to fetch video details: ${error.message}`);
-    throw new Error("Failed to fetch video details.");
+    console.error(`[WORKER] Job failed: ${error.message}`);
+    await JobQueue.findByIdAndUpdate(job._id, {
+      status: 'failed',
+      error: error.message
+    });
   }
-};
+}
 
-// Helper function to compress audio using ffmpeg
-const compressAudio = async (inputPath, outputPath) => {
-  console.log("[COMPRESS] Compressing audio...");
-  return new Promise((resolve, reject) => {
-    ffmpeg(inputPath)
-      .audioBitrate(64)
-      .save(outputPath)
-      .on("end", () => {
-        console.log(`[COMPRESS] Compression completed: ${outputPath}`);
-        resolve(outputPath);
-      })
-      .on("error", (err) => {
-        console.error("[COMPRESS] Compression error:", err.message);
-        reject(err);
-      });
-  });
-};
-
-// Helper function to download and compress audio
-const downloadAndCompressAudio = async (videoId) => {
-  const originalAudioPath = path.resolve(__dirname, `../temp/${videoId}.mp3`);
-  const compressedAudioPath = path.resolve(__dirname, `../temp/${videoId}_compressed.mp3`);
-
-  console.log(`[DOWNLOAD] Downloading audio for video ID: ${videoId}`);
-  await youtubedl(`https://www.youtube.com/watch?v=${videoId}`, {
-    extractAudio: true,
-    audioFormat: "mp3",
-    output: originalAudioPath,
-    audioQuality: "128K",
-  });
-
-  if (!fs.existsSync(originalAudioPath)) {
-    console.error(`[DOWNLOAD] Audio file not found: ${originalAudioPath}`);
-    throw new Error("Audio file not found.");
-  }
-
-  console.log(`[DOWNLOAD] Download completed: ${originalAudioPath}`);
-
-  await compressAudio(originalAudioPath, compressedAudioPath);
-
-  // Clean up the original file
-  fs.unlinkSync(originalAudioPath);
-  console.log(`[CLEANUP] Original audio file removed: ${originalAudioPath}`);
-
-  return compressedAudioPath;
-};
-
-// Helper function to transcribe and summarize audio
-const transcribeAndSummarize = async (audioPath) => {
-  console.log(`[TRANSCRIBE] Uploading audio for transcription: ${audioPath}`);
-  const uploadUrl = "https://api.assemblyai.com/v2/upload";
-  const audioStream = fs.createReadStream(audioPath);
-
-  const uploadResponse = await axios.post(uploadUrl, audioStream, {
-    headers: {
-      authorization: ASSEMBLYAI_API_KEY,
-      "content-type": "application/json",
-    },
-  });
-
-  const { upload_url: audioUrl } = uploadResponse.data;
-  console.log(`[TRANSCRIBE] Audio uploaded: ${audioUrl}`);
-
-  console.log("[TRANSCRIBE] Starting transcription...");
-  const transcriptResponse = await axios.post(
-    "https://api.assemblyai.com/v2/transcript",
-    {
-      audio_url: audioUrl,
-      auto_chapters: true, // Enable auto chapters
-    },
-    {
-      headers: {
-        authorization: ASSEMBLYAI_API_KEY,
-      },
-    }
-  );
-
-  const { id: transcriptId } = transcriptResponse.data;
-
-  while (true) {
-    const statusResponse = await axios.get(
-      `https://api.assemblyai.com/v2/transcript/${transcriptId}`,
-      {
-        headers: { authorization: ASSEMBLYAI_API_KEY },
-      }
-    );
-
-    if (statusResponse.data.status === "completed") {
-      console.log("[TRANSCRIBE] Transcription completed.");
-
-      const { chapters } = statusResponse.data;
-
-      if (!chapters || chapters.length === 0) {
-        throw new Error("[TRANSCRIBE] No chapters found in the transcription.");
-      }
-
-      console.log(`[TRANSCRIBE] Extracting summaries from ${chapters.length} chapters.`);
-
-      // Map chapters to flashcards structure
-      const flashcards = chapters.map((chapter, index) => {
-        console.log(`Chapter ${index + 1}:`, chapter); // Log each chapter for debugging
-
-        return {
-          content: chapter.summary || "No content available",
-          startTime: chapter.start || 0,
-          endTime: chapter.end || 0,
-        };
-      });
-
-      console.log("[TRANSCRIBE] Flashcards:", flashcards);
-      return flashcards;
-    }
-
-    if (statusResponse.data.status === "failed") {
-      throw new Error("[TRANSCRIBE] Transcription failed.");
-    }
-
-    console.log("[TRANSCRIBE] In progress...");
-    await new Promise((resolve) => setTimeout(resolve, 5000)); // Wait for 5 seconds before polling again
-  }
-};
-
-
-// Updated to include start and end times in flashcards
-new Worker(
-  "flashcardsQueue",
-  async (job) => {
-    const { videoId, userId } = job.data;
-
-    let compressedAudioPath; // Declare here for cleanup in finally block
-    try {
-      console.log(`[WORKER] Processing job for video ID: ${videoId}, User ID: ${userId}`);
-      const { title, thumbnail } = await fetchVideoDetails(videoId);
-      compressedAudioPath = await downloadAndCompressAudio(videoId);
-
-      // Fetch and log chapters
-      const chapters = await transcribeAndSummarize(compressedAudioPath);
-      console.log("[WORKER] Chapters received:", chapters);
-
-      // Directly use the returned chapters as flashcards
-      const flashcards = chapters.map((chapter) => ({
-        content: chapter.content,
-        startTime: chapter.startTime,
-        endTime: chapter.endTime,
-      }));
-
-      console.log("[WORKER] Final Flashcards:", flashcards);
-
-      const video = new YouTubeVideo({ videoId, userId, title, thumbnail, flashcards });
-      await video.save();
-
-      console.log(`[WORKER] Job completed successfully for video ID: ${videoId}`);
-    } catch (error) {
-      console.error(`[WORKER] Job failed: ${error.message}`);
-      throw error;
-    } finally {
-      // Cleanup the compressed audio file
-      if (compressedAudioPath && fs.existsSync(compressedAudioPath)) {
-        fs.unlinkSync(compressedAudioPath);
-        console.log(`[CLEANUP] Compressed audio file removed: ${compressedAudioPath}`);
-      }
-    }
-  },
-  { connection }
-);
-
-
-
-// Route to generate flashcards
+// Update the generate route
 router.post("/generate", ensureAuthenticated, async (req, res) => {
   const { videoId } = req.body;
 
@@ -236,19 +95,41 @@ router.post("/generate", ensureAuthenticated, async (req, res) => {
       });
     }
 
-    const job = await flashcardsQueue.add("generateFlashcards", {
+    // Create a new job in MongoDB
+    const job = await JobQueue.create({
       videoId,
       userId: req.user._id,
+      status: 'pending'
     });
 
-    console.log(`[QUEUE] Job added to queue with ID: ${job.id}`);
+    // Process the job asynchronously
+    processJob(job).catch(console.error);
+
+    console.log(`[QUEUE] Job created with ID: ${job._id}`);
     res.json({
       message: "Flashcards generation process has started.",
-      jobId: job.id,
+      jobId: job._id
     });
   } catch (error) {
     console.error(`[REQUEST] Error processing generate request: ${error.message}`);
     res.status(500).json({ error: "Failed to process the video." });
+  }
+});
+
+// Add a new route to check job status
+router.get("/job-status/:jobId", ensureAuthenticated, async (req, res) => {
+  try {
+    const job = await JobQueue.findById(req.params.jobId);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json({
+      status: job.status,
+      result: job.result,
+      error: job.error
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch job status" });
   }
 });
 
