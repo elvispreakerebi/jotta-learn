@@ -149,7 +149,7 @@ const Dashboard = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="w-full fixed top-0 bg-white shadow-sm" style={{ zIndex: 10 }}>
-        <div className="flex justify-between items-center px-16 py-3">
+        <div className="flex justify-between items-center px-4 py-3">
           <h1 className="text-2xl font-bold text-gray-800">Jotta</h1>
           <div className="flex items-center space-x-4">
             {user ? (
@@ -193,17 +193,17 @@ const Dashboard = () => {
             )}
           </div>
         </div>
-        <div className="py-4 px-16" style={{ maxWidth: "42rem", margin: "0 auto" }}>
+        <div className="py-4 px-4 sm:px-16 mx-auto max-w-2xl">
           <p className="text-gray-700 mb-4 text-center">
             {savedVideos.length > 0
               ? "Enter a YouTube video link to generate more flashcards or view your previously generated videos below."
               : "Enter a YouTube video link to get started with your first flashcards."}
           </p>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-2 space-y-2 sm:space-y-0" style={{ maxWidth: "42rem" }}>
+          <div className="flex flex-col sm:flex-row sm:justify-center sm:space-x-2 space-y-2 sm:space-y-0 w-full max-w-2xl">
             <input
               type="text"
               placeholder="Enter YouTube video URL"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400"
               value={youtubeUrl}
               onChange={(e) => setYoutubeUrl(e.target.value)}
             />
