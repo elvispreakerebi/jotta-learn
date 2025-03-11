@@ -2,6 +2,7 @@
 require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/db");
+const session = require("express-session");
 const passport = require("passport");
 const flash = require("connect-flash");
 const cors = require("cors");
@@ -21,6 +22,23 @@ connectDB();
 
 // Passport Configuration
 require("./config/passport")(passport);
+
+// Session Middleware using MongoDB
+app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "your_secret", // Use a strong secret in production
+      resave: false,
+      saveUninitialized: false,
+      store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URI, // Your MongoDB connection string
+      }),
+      cookie: {
+        secure: process.env.NODE_ENV === "production", // Secure cookies only in production
+        httpOnly: true, // Prevent client-side access to the cookie
+        sameSite: 'none', // Adjust for environment
+      },
+    })
+);
 
 // Flash Middleware
 app.use(flash());
