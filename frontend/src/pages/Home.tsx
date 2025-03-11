@@ -1,7 +1,7 @@
 
 const Home = () => {
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/auth/google"; // Redirect to backend
+    window.location.href = "https://jotta.onrender.com/auth/google"; // Redirect to backend
   };
 
   return (
