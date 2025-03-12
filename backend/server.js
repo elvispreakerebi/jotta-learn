@@ -13,7 +13,7 @@ const app = express();
 
 // Cors Middleware
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000", "https://jotta.onrender.com"],
   credentials: true
 }));
 app.use(express.json());
@@ -37,9 +37,9 @@ app.use(
         mongoUrl: process.env.MONGO_URI, // Your MongoDB connection string
       }),
       cookie: {
-        secure: false, // Set to false in development
+        secure: true, // Set to true for HTTPS
         httpOnly: true, // Prevent client-side access to the cookie
-        sameSite: 'lax', // Use 'lax' for development
+        sameSite: 'none', // Required for cross-site cookies
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
       },
     })

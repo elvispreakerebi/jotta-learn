@@ -6,9 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import axios from "axios";
 
 // Set Axios defaults based on the environment
-axios.defaults.baseURL = process.env.NODE_ENV === "production"
-  ? "https://jotta.onrender.com"
-  : "http://localhost:5000";
+axios.defaults.baseURL = "https://jotta.onrender.com"
 axios.defaults.withCredentials = true; // Include credentials for all requests
 
 const root = ReactDOM.createRoot(
