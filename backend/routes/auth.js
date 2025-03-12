@@ -30,14 +30,18 @@ router.get(
         req.flash("success", "You've logged in");
       }
 
-      // Dynamically determine the base URL
-      // const baseUrl = `${req.protocol}://${req.get("host")}`;
-
       // Redirect with flash messages
-      res.redirect(`http://localhost:3000/dashboard?message=${encodeURIComponent(req.flash("success"))}`);
+      const redirectUrl = process.env.NODE_ENV === 'production'
+        ? `${process.env.CLIENT_URL}/dashboard`
+        : 'http://localhost:3000/dashboard';
+      
+      res.redirect(`${redirectUrl}?message=${encodeURIComponent(req.flash("success"))}`);
     } catch (err) {
       console.error(err);
-      res.redirect("/login");
+      res.redirect(process.env.NODE_ENV === 'production'
+        ? `${process.env.CLIENT_URL}/login`
+        : 'http://localhost:3000/login'
+      );
     }
   }
 );
