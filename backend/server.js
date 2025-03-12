@@ -13,7 +13,9 @@ const app = express();
 
 // Cors Middleware
 app.use(cors({
-  origin: ["http://localhost:3000", "https://jotta.onrender.com"],
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.CLIENT_URL 
+    : "http://localhost:3000",
   credentials: true
 }));
 app.use(express.json());
@@ -37,10 +39,11 @@ app.use(
         mongoUrl: process.env.MONGO_URI, // Your MongoDB connection string
       }),
       cookie: {
-        secure: true, // Set to true for HTTPS
+        secure: process.env.NODE_ENV === 'production', // Set to false in development
         httpOnly: true, // Prevent client-side access to the cookie
-        sameSite: 'none', // Required for cross-site cookies
-        maxAge: 24 * 60 * 60 * 1000 // 24 hours
+        sameSite: 'none', // Use 'lax' for development
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        domain: process.env.NODE_ENV === 'production' ? 'onrender.com' : 'localhost', // Set the domain based on the environment
       },
     })
 );
