@@ -30,14 +30,10 @@ router.get(
         req.flash("success", "You've logged in");
       }
 
-      // Send JSON response with user data and success message
-      res.json({
-        user: {
-          name: user.name,
-          profileImage: user.profilePicture
-        },
-        message: req.flash("success")
-      });
+      // Redirect to frontend dashboard
+      res.redirect(process.env.NODE_ENV === "production" 
+        ? "https://jotta-app.onrender.com/dashboard"
+        : "http://localhost:3000/dashboard");
     } catch (err) {
       console.error(err);
       res.redirect("/login");

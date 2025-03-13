@@ -14,7 +14,7 @@ const Home = () => {
         });
         const data = await response.json();
         
-        if (response.ok && data.user) {
+        if (response.ok && data.name) {
           navigate("/dashboard");
         }
       } catch (error) {
