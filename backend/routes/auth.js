@@ -30,18 +30,17 @@ router.get(
         req.flash("success", "You've logged in");
       }
 
-      // Redirect with flash messages
-      const redirectUrl = process.env.NODE_ENV === 'production'
-        ? `${process.env.CLIENT_URL}/dashboard`
-        : 'http://localhost:3000/dashboard';
-      
-      res.redirect(`${redirectUrl}?message=${encodeURIComponent(req.flash("success"))}`);
+      // Send JSON response with user data and success message
+      res.json({
+        user: {
+          name: user.name,
+          profileImage: user.profilePicture
+        },
+        message: req.flash("success")
+      });
     } catch (err) {
       console.error(err);
-      res.redirect(process.env.NODE_ENV === 'production'
-        ? `${process.env.CLIENT_URL}/login`
-        : 'http://localhost:3000/login'
-      );
+      res.redirect("/login");
     }
   }
 );
