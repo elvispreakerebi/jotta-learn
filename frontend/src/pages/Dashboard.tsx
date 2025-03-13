@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Menu, Transition } from "@headlessui/react";
 import { ChevronDownIcon, LogOutIcon, FileTextIcon } from "lucide-react";
 import { toast } from "react-toastify";
-import axios from "axios";
+import axiosInstance from "../config/axios";
 import YoutubeVideoCard from "../components/YoutubeVideoCard";
 import "react-toastify/dist/ReactToastify.css";
 
 interface User {
   name: string;
-  profileImage: string;
+  email: string;
 }
 
 interface SavedVideo {
@@ -33,8 +33,12 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchUserAndVideos = async () => {
       try {
-        const userResponse = await axios.get("/auth/user", { withCredentials: true });
-        setUser(userResponse.data);
+        const userResponse = await axiosInstance.get("/auth/user");
+        const emailPrefix = userResponse.data.email.split("@")[0];
+        setUser({
+          name: emailPrefix,
+          email: userResponse.data.email,
+        });
 
         await fetchSavedVideos();
       } catch (error: any) {
@@ -60,7 +64,7 @@ const Dashboard = () => {
 
   const fetchSavedVideos = async () => {
     try {
-      const videosResponse = await axios.get("/youtube/saved-videos", { withCredentials: true });
+      const videosResponse = await axiosInstance.get("/youtube/saved-videos");
       setSavedVideos(videosResponse.data);
     } catch (error) {
       console.error("Error fetching saved videos:", error);
@@ -70,7 +74,7 @@ const Dashboard = () => {
 
   const checkVideoExists = async (videoId: string) => {
     try {
-      const response = await axios.get(`/youtube/${videoId}`, { withCredentials: true });
+      const response = await axiosInstance.get(`/youtube/${videoId}`);
       return response.status === 200;
     } catch (error) {
       return false;
@@ -79,7 +83,7 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await axios.get("/auth/logout", { withCredentials: true });
+      await axiosInstance.get("/auth/logout");
       window.location.href = "/";
     } catch (error) {
       console.error("Error logging out:", error);
@@ -115,7 +119,7 @@ const Dashboard = () => {
         return;
       }
   
-      const response = await axios.post("/youtube/generate", { videoId }, { withCredentials: true });
+      const response = await axiosInstance.post("/youtube/generate", { videoId });
       toast.success(response.data.message);
   
       const interval = setInterval(async () => {
@@ -152,14 +156,9 @@ const Dashboard = () => {
         <div className="flex justify-between items-center px-4 py-3">
           <h1 className="text-2xl font-bold text-gray-800">Jotta</h1>
           <div className="flex items-center space-x-4">
-            {user ? (
+            {user && (
               <>
-                <img
-                  src={user.profileImage || "https://via.placeholder.com/40"}
-                  alt="User"
-                  className="w-10 h-10 rounded-full border border-gray-300"
-                />
-                <p className="text-gray-800 hidden sm:block">{user.name}</p>
+                <p className="text-gray-800">{user.name}</p>
                 <Menu as="div" className="relative">
                   <Menu.Button>
                     <ChevronDownIcon className="w-6 h-6 text-gray-600" style={{ cursor: "pointer" }} />
@@ -188,8 +187,6 @@ const Dashboard = () => {
                   </Transition>
                 </Menu>
               </>
-            ) : (
-              <p className="text-gray-800">Loading user...</p>
             )}
           </div>
         </div>

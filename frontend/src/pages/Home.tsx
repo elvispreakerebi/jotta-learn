@@ -2,13 +2,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
+import axiosInstance from "../config/axios";
 
 const Home = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
   });
@@ -16,11 +15,16 @@ const Home = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const endpoint = isLogin ? "auth/login" : "auth/register";
-      const response = await axios.post(endpoint, formData, { withCredentials: true });
+      const endpoint = isLogin ? "/auth/login" : "/auth/register";
+      const response = await axiosInstance.post(endpoint, formData);
       
-      toast.success(response.data.message);
-      navigate("/dashboard");
+      if (isLogin) {
+        toast.success(response.data.message);
+        navigate("/dashboard");
+      } else {
+        toast.success("Registration successful! Please login.");
+        setIsLogin(true);
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || "An error occurred");
     }
@@ -44,23 +48,6 @@ const Home = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Name
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-          )}
-
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email

@@ -110,10 +110,14 @@ router.get("/user", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     res.json({
+      id: user._id,
       email: user.email
     });
   } catch (error) {
     console.error("Error fetching user:", error);
+    if (error.name === 'CastError') {
+      return res.status(400).json({ message: "Invalid user ID format" });
+    }
     res.status(500).json({ message: "Error fetching user data" });
   }
 });
