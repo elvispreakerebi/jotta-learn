@@ -30,10 +30,12 @@ router.get(
         req.flash("success", "You've logged in");
       }
 
-      // Redirect to frontend dashboard
-      res.redirect(process.env.NODE_ENV === "production" 
-        ? "https://jotta-app.onrender.com/dashboard"
-        : "http://localhost:3000/dashboard");
+      // Redirect to frontend dashboard with success message
+      const successMessage = req.flash("success");
+      const redirectUrl = process.env.NODE_ENV === "production"
+        ? `https://jotta-app.onrender.com/dashboard?message=${encodeURIComponent(successMessage)}`
+        : `http://localhost:3001/dashboard?message=${encodeURIComponent(successMessage)}`;      
+      res.redirect(redirectUrl);
     } catch (err) {
       console.error(err);
       res.redirect("/login");
