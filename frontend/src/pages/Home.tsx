@@ -16,7 +16,7 @@ const Home = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const endpoint = isLogin ? "/auth/login" : "/auth/register";
+      const endpoint = isLogin ? "auth/login" : "auth/register";
       const response = await axios.post(endpoint, formData, { withCredentials: true });
       
       toast.success(response.data.message);
