@@ -12,7 +12,9 @@ const Home = () => {
         const response = await fetch("https://jotta.onrender.com/auth/user", {
           credentials: "include",
         });
-        if (response.ok) {
+        const data = await response.json();
+        
+        if (response.ok && data.name) {
           navigate("/dashboard");
         }
       } catch (error) {
@@ -21,6 +23,16 @@ const Home = () => {
     };
 
     checkAuth();
+
+    // Add event listener for message from popup
+    const handleMessage = (event: MessageEvent) => {
+      if (event.origin === "https://jotta.onrender.com" && event.data.user) {
+        navigate("/dashboard");
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+    return () => window.removeEventListener("message", handleMessage);
   }, [navigate]);
 
   const handleGoogleLogin = () => {
