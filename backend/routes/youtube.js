@@ -245,6 +245,10 @@ const processVideoChunks = async (job, compressedAudioPath) => {
   });
   await video.save();
 
+  // Delete the job after successful video creation
+  await VideoProcessingJob.findByIdAndDelete(job._id);
+
+  return video;
   // Update job status
   job.status = 'completed';
   job.processingCompletedAt = new Date();
@@ -266,6 +270,8 @@ router.post("/generate", ensureAuthenticated, async (req, res) => {
 
   try {
     console.log(`[REQUEST] Received request to generate flashcards for video ID: ${videoId}`);
+    
+    // Check for existing video
     const existingVideo = await YouTubeVideo.findOne({
       videoId,
       userId: req.user._id,
@@ -275,6 +281,21 @@ router.post("/generate", ensureAuthenticated, async (req, res) => {
       console.log("[REQUEST] Flashcards already exist for this video.");
       return res.status(400).json({
         error: "Flashcards for this video already exist for this user.",
+      });
+    }
+
+    // Check for existing processing job
+    const existingJob = await VideoProcessingJob.findOne({
+      videoId,
+      userId: req.user._id,
+      status: { $in: ['queued', 'processing'] }
+    });
+
+    if (existingJob) {
+      console.log(`[REQUEST] Video ${videoId} is already being processed.`);
+      return res.status(409).json({
+        error: "This video is already being processed.",
+        jobId: existingJob._id
       });
     }
 
@@ -347,6 +368,13 @@ router.delete("/:videoId", ensureAuthenticated, async (req, res) => {
   const { videoId } = req.params;
 
   try {
+    // Delete the video processing job first
+    await VideoProcessingJob.findOneAndDelete({
+      videoId,
+      userId: req.user._id,
+    });
+
+    // Then delete the video
     const video = await YouTubeVideo.findOneAndDelete({
       videoId,
       userId: req.user._id,
