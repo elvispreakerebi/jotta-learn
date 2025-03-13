@@ -9,7 +9,10 @@ const ensureAuthenticated = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = {
+      id: decoded.id,
+      _id: decoded.id  // Adding _id for mongoose compatibility
+    };
     next();
   } catch (error) {
     res.status(401).json({ error: "Invalid token. Please log in again." });

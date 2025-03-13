@@ -74,10 +74,31 @@ const Dashboard = () => {
 
   const checkVideoExists = async (videoId: string) => {
     try {
-      const response = await axiosInstance.get(`/youtube/${videoId}`);
+      const response = await axiosInstance.get(`/youtube/${videoId}`, {
+        timeout: 5000, // Shorter timeout for status checks
+      });
       return response.status === 200;
-    } catch (error) {
-      return false;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return false;
+      }
+      if (error.code === 'ECONNABORTED') {
+        console.log('Status check timeout - assuming processing continues');
+        return false;
+      }
+      throw error;
+    }
+  };
+
+  const checkVideoStatus = async (videoId: string) => {
+    try {
+      const response = await axiosInstance.get(`/youtube/job/${videoId}`);
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw error;
     }
   };
 
@@ -106,45 +127,72 @@ const Dashboard = () => {
       setIsGenerating(true);
       const videoId = youtubeUrl.split("v=")[1]?.split("&")[0];
       if (!videoId) {
-        toast.error("Invalid YouTube URL");
+        toast.error("Invalid YouTube URL. Please provide a valid YouTube video URL.");
         setIsGenerating(false);
         return;
       }
   
-      const videoExists = await checkVideoExists(videoId);
-      if (videoExists) {
-        toast.error("Flashcards already exist for this video.");
-        setYoutubeUrl("");
-        setIsGenerating(false);
-        return;
+      try {
+        const videoExists = await checkVideoExists(videoId);
+        if (videoExists) {
+          toast.error("Flashcards already exist for this video.");
+          setYoutubeUrl("");
+          setIsGenerating(false);
+          return;
+        }
+      } catch (error: any) {
+        if (error.code !== 'ECONNABORTED') {
+          console.error("Error checking video existence:", error);
+          toast.error("Failed to check video existence. Please try again.");
+          setIsGenerating(false);
+          return;
+        }
       }
   
       const response = await axiosInstance.post("/youtube/generate", { videoId });
-      toast.success(response.data.message);
+      toast.success("Starting flashcard generation process...");
   
       const interval = setInterval(async () => {
-        const videoExists = await checkVideoExists(videoId);
-        if (videoExists) {
-          clearInterval(interval);
-          setPollingInterval(null);
-          await fetchSavedVideos();
-          setIsGenerating(false);
-          setProgress(100);
-          toast.success("Flashcards have been saved!");
-          setYoutubeUrl("");
-        } else {
-          setProgress((prev) => Math.min(prev + 1, 99));
+        try {
+          const status = await checkVideoStatus(videoId);
+          
+          if (status) {
+            if (status.status === 'completed') {
+              clearInterval(interval);
+              setPollingInterval(null);
+              await fetchSavedVideos();
+              setIsGenerating(false);
+              setProgress(100);
+              toast.success("Flashcards have been generated successfully!");
+              setYoutubeUrl("");
+            } else if (status.status === 'failed') {
+              clearInterval(interval);
+              setPollingInterval(null);
+              setIsGenerating(false);
+              setProgress(0);
+              toast.error(status.error || "Failed to generate flashcards.");
+              setYoutubeUrl("");
+            } else {
+              // Update progress based on job status
+              setProgress(status.progress || Math.min(progress + 1, 99));
+            }
+          } else {
+            setProgress((prev) => Math.min(prev + 1, 99));
+          }
+        } catch (error: any) {
+          console.error("Error checking video status:", error);
+          // Don't stop polling on network errors
+          if (error.code !== 'ECONNABORTED') {
+            setProgress((prev) => Math.min(prev + 1, 99));
+          }
         }
       }, 2000);
   
       setPollingInterval(interval);
     } catch (error: any) {
       console.error("Error generating video details:", error);
-  
-      const errorMessage =
-        error.response?.data?.error || "Failed to generate video details. Please try again.";
+      const errorMessage = error.response?.data?.error || "Failed to start video processing. Please try again.";
       toast.error(errorMessage);
-  
       setIsGenerating(false);
       setProgress(0);
     }

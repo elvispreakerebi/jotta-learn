@@ -214,10 +214,10 @@ const processVideoChunks = async (job, compressedAudioPath) => {
       try {
         const transcription = await transcribeAndSummarize(chunk.path);
         job.chunks[index].status = 'completed';
-        job.chunks[index].transcription = transcription[0].content;
+        job.chunks[index].transcription = transcription.map(t => t.content).join('\n');
         job.progress = ((index + 1) / chunks.length) * 100;
         await job.save();
-        return transcription[0];
+        return transcription; // Return all flashcards, not just the first one
       } catch (error) {
         job.chunks[index].status = 'failed';
         await job.save();
@@ -231,13 +231,13 @@ const processVideoChunks = async (job, compressedAudioPath) => {
     })
   );
 
-  // Create final video document
+  // Create final video document with all flashcards
   const video = new YouTubeVideo({
     videoId,
     userId,
     title,
     thumbnail,
-    flashcards: chunkResults.map(result => ({
+    flashcards: chunkResults.flat().map(result => ({
       content: result.content,
       startTime: result.startTime,
       endTime: result.endTime
