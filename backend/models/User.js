@@ -2,10 +2,8 @@ const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema(
   {
-    googleId: { type: String, required: true },
-    name: { type: String },
-    email: { type: String },
-    profilePicture: { type: String },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt fields
 );
