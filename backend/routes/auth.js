@@ -1,6 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
-const { hashPassword, comparePassword, generateToken, verifyToken, validateEmail, validatePassword } = require("../middleware/auth");
+const { hashPassword, comparePassword, generateToken, verifyToken, validateEmail } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -16,12 +16,6 @@ router.post("/register", async (req, res) => {
 
     if (!validateEmail(email)) {
       return res.status(400).json({ message: "Invalid email format" });
-    }
-
-    if (!validatePassword(password)) {
-      return res.status(400).json({
-        message: "Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number"
-      });
     }
 
     // Check if user already exists

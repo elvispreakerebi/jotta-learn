@@ -83,7 +83,7 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await axiosInstance.get("/auth/logout");
+      await axiosInstance.post("/auth/logout");
       window.location.href = "/";
     } catch (error) {
       console.error("Error logging out:", error);
