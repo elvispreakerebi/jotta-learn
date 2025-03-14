@@ -114,12 +114,19 @@ const Dashboard = () => {
 
   const handleGenerate = async () => {
     if (isGenerating) {
-      setIsGenerating(false);
-      setProgress(0);
-      setYoutubeUrl("");
-      if (pollingInterval) clearInterval(pollingInterval);
-      setPollingInterval(null);
-      toast.info("Generation process cancelled.");
+      try {
+        const videoId = youtubeUrl.split("v=")[1]?.split("&")[0];
+        await axiosInstance.delete(`/youtube/job/${videoId}`);
+        setIsGenerating(false);
+        setProgress(0);
+        setYoutubeUrl("");
+        if (pollingInterval) clearInterval(pollingInterval);
+        setPollingInterval(null);
+        toast.info("Generation process cancelled.");
+      } catch (error: any) {
+        console.error("Error cancelling video processing:", error);
+        toast.error("Failed to cancel video processing. Please try again.");
+      }
       return;
     }
   

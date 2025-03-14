@@ -363,6 +363,28 @@ router.get("/:videoId", ensureAuthenticated, async (req, res) => {
   }
 });
 
+// Route to cancel video processing
+router.delete("/job/:videoId", ensureAuthenticated, async (req, res) => {
+  const { videoId } = req.params;
+
+  try {
+    const job = await VideoProcessingJob.findOneAndDelete({
+      videoId,
+      userId: req.user._id,
+      status: { $in: ['queued', 'processing'] }
+    });
+
+    if (!job) {
+      return res.status(404).json({ error: "No active processing job found for this video." });
+    }
+
+    res.json({ message: "Video processing cancelled successfully" });
+  } catch (error) {
+    console.error("Error cancelling video processing:", error);
+    res.status(500).json({ error: "Failed to cancel video processing." });
+  }
+});
+
 // Route to delete a video
 router.delete("/:videoId", ensureAuthenticated, async (req, res) => {
   const { videoId } = req.params;
