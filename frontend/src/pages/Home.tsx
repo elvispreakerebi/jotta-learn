@@ -92,7 +92,7 @@ const Home = () => {
               className=" text-sm font-medium hover:underline bg-transparent border-none"
             >
               <span className="text-gray-700 text-sm">Need an account? </span>
-              <span className="text-blue-600 text-sm">Register</span>
+              <span className="text-blue-600 text-sm underline font-bold">Register</span>
               
             </button>
           </div>
@@ -103,7 +103,7 @@ const Home = () => {
               className="text-sm font-medium hover:underline bg-transparent border-none"
             >
               <span className="text-gray-700 text-sm">Already have an account? </span>
-              <span className="text-blue-600 text-sm underline">Sign In</span>
+              <span className="text-blue-600 text-sm underline font-bold">Sign In</span>
               
             </button>
           </div>

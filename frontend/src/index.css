@@ -87,6 +87,14 @@ code {
   color: var(--color-blue-600);
 }
 
+.underline {
+  text-decoration: underline;
+}
+
+.font-bold{
+  font-weight: bold;
+}
+
 .text-gray-600 {
   color: var(--color-gray-600);
 }
