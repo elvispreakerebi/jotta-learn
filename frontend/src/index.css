@@ -51,11 +51,18 @@ code {
     monospace;
 }
 
+
 /* Utility Classes */
 .min-h-screen {
   min-height: 100vh;
 }
 
+.bg-transparent {
+  background-color: transparent;
+}
+.border-none {
+  border-width: 0;
+}
 .bg-gray-50 {
   background-color: var(--color-gray-50);
 }
@@ -74,6 +81,10 @@ code {
 
 .text-white {
   color: var(--color-white);
+}
+
+.text-blue-600 {
+  color: var(--color-blue-600);
 }
 
 .text-gray-600 {

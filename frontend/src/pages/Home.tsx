@@ -85,14 +85,29 @@ const Home = () => {
           </button>
         </form>
 
-        <div className="text-center mt-4">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-600 text-sm font-medium bg-white border border-transparent hover:bg-gray-50 focus:outline-none"
-          >
-            {isLogin ? "Need an account? Register" : "Already have an account? Sign In"}
-          </button>
-        </div>
+        {isLogin ? (
+          <div className="text-center mt-4">
+            <button
+              onClick={() => setIsLogin(false)}
+              className=" text-sm font-medium hover:underline bg-transparent border-none"
+            >
+              <span className="text-gray-700 text-sm">Need an account? </span>
+              <span className="text-blue-600 text-sm">Register</span>
+              
+            </button>
+          </div>
+        ) : (
+          <div className="text-center mt-4">
+            <button
+              onClick={() => setIsLogin(true)}
+              className="text-sm font-medium hover:underline bg-transparent border-none"
+            >
+              <span className="text-gray-700 text-sm">Already have an account? </span>
+              <span className="text-blue-600 text-sm underline">Sign In</span>
+              
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
