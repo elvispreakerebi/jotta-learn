@@ -63,6 +63,11 @@ code {
 .border-none {
   border-width: 0;
 }
+
+.outline-none {
+  outline: none;
+}
+
 .bg-gray-50 {
   background-color: var(--color-gray-50);
 }

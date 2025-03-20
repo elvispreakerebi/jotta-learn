@@ -6,6 +6,7 @@ import axiosInstance from "../config/axios";
 const Home = () => {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -63,18 +64,29 @@ const Home = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-800">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required
-            />
+            <div className="flex justify-between items-center">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-800">
+                Password
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-sm text-gray-600 hover:underline border-none focus:outline-none bg-transparent"
+              >
+                {showPassword ? "Hide password" : "Show password"}
+              </button>
+            </div>
+            <div className="mt-1">
+              <input
+                type={showPassword ? "text" : "password"}
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                required
+              />
+            </div>
           </div>
 
           <button
