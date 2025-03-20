@@ -8,6 +8,7 @@ import {
   ChevronRightIcon,
 } from "lucide-react";
 
+// Interfaces for flashcard data structure and video details
 interface Flashcard {
   content: string;
   startTime: number; // Start timestamp in milliseconds
@@ -19,7 +20,7 @@ interface Video {
   flashcards: Flashcard[];
 }
 
-
+// Component for displaying and managing individual video flashcards
 const FlashcardDetails: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const navigate = useNavigate();
@@ -30,6 +31,7 @@ const FlashcardDetails: React.FC = () => {
   const [currentFlashcard, setCurrentFlashcard] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Fetch video details and flashcards on component mount
   useEffect(() => {
     const fetchVideoDetails = async () => {
       try {
@@ -49,6 +51,7 @@ const FlashcardDetails: React.FC = () => {
     fetchVideoDetails();
   }, [videoId]);  
 
+  // Handle video and flashcards deletion
   const handleDelete = async () => {
     setDeleting(true);
     try {
@@ -65,6 +68,7 @@ const FlashcardDetails: React.FC = () => {
     }
   };
 
+  // Navigation functions for flashcard carousel
   const handlePreviousFlashcard = () => {
     if (currentFlashcard !== null && currentFlashcard > 0) {
       setCurrentFlashcard(currentFlashcard - 1);
@@ -77,6 +81,7 @@ const FlashcardDetails: React.FC = () => {
     }
   };
 
+  // Convert milliseconds to formatted time string (HH:MM:SS)
   const formatTime = (ms: number) => {
   if (typeof ms !== "number" || isNaN(ms)) {
     console.error("Invalid time value:", ms);
@@ -91,6 +96,7 @@ const FlashcardDetails: React.FC = () => {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 };
 
+  // Loading state UI
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -99,6 +105,7 @@ const FlashcardDetails: React.FC = () => {
     );
   }
 
+  // Error state UI
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-red-600">
@@ -156,7 +163,7 @@ const FlashcardDetails: React.FC = () => {
         </div>
       )}
 
-      {/* Flashcards Section */}
+      {/* Grid layout for displaying flashcard previews */}
       <div className="mt-16 px-6 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {video?.flashcards.length ? (
           video.flashcards.map((flashcard, index) => (
@@ -178,7 +185,7 @@ const FlashcardDetails: React.FC = () => {
         )}
       </div>
 
-      {/* Flashcard Overlay */}
+      {/* Modal overlay for viewing individual flashcards */}
       {currentFlashcard !== null && video && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center z-30">
           <div className="bg-white rounded-lg shadow-lg relative max-w-md w-full p-6 text-center">
