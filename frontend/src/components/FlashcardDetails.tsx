@@ -139,14 +139,58 @@ const FlashcardDetails: React.FC = () => {
 
       {/* Confirmation Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-lg font-bold mb-4">Confirm Deletion</h2>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20"
+          style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 20
+          }}
+        >
+          <div
+            className="bg-white p-6 rounded-lg shadow-lg"
+            style={{
+              backgroundColor: 'white',
+              padding: '1.5rem',
+              borderRadius: '0.5rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)'
+            }}
+          >
+            <h2
+              className="text-lg font-bold mb-4"
+              style={{
+                fontSize: '1.125rem',
+                fontWeight: 'bold',
+                marginBottom: '1rem'
+              }}
+            >
+              Confirm Deletion
+            </h2>
             <p>Are you sure you want to delete this video and its flashcards?</p>
-            <div className="mt-4 flex justify-end space-x-2">
+            <div
+              className="mt-4 flex justify-end space-x-2"
+              style={{
+                marginTop: '1rem',
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}
+            >
               <button
                 onClick={() => setShowModal(false)}
                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '0.25rem',
+                  marginRight: '0.5rem'
+                }}
                 disabled={deleting}
               >
                 Cancel
@@ -154,6 +198,12 @@ const FlashcardDetails: React.FC = () => {
               <button
                 onClick={handleDelete}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#dc2626',
+                  color: 'white',
+                  borderRadius: '0.25rem'
+                }}
                 disabled={deleting}
               >
                 {deleting ? "Deleting..." : "Delete"}
