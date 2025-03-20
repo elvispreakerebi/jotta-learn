@@ -237,6 +237,11 @@ code {
   padding-right: var(--spacing-4);
 }
 
+.px-6 {
+  padding-left: var(--spacing-6);
+  padding-right: var(--spacing-6);
+}
+
 .px-16 {
   padding-left: var(--spacing-16);
   padding-right: var(--spacing-16);
@@ -288,6 +293,10 @@ code {
 
 .m-4 {
   margin: var(--spacing-4);
+}
+
+.gap-4 {
+  gap: var(--spacing-4);
 }
 
 /* Hover States */
