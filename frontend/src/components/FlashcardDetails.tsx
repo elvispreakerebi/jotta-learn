@@ -237,34 +237,134 @@ const FlashcardDetails: React.FC = () => {
 
       {/* Modal overlay for viewing individual flashcards */}
       {currentFlashcard !== null && video && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center z-30">
-          <div className="bg-white rounded-lg shadow-lg relative max-w-md w-full p-6 text-center">
-            <p className="text-gray-600 mb-2 text-left">
+        <div
+          className="fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center justify-center z-30"
+          style={{
+            position: 'fixed',
+            top: 0,
+            right: 0,
+            bottom: 0,
+            left: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.75)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 30
+          }}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg relative max-w-md w-full p-6 text-center"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '0.5rem',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+              position: 'relative',
+              maxWidth: '28rem',
+              width: '100%',
+              padding: '1.5rem',
+              textAlign: 'center'
+            }}
+          >
+            <p
+              className="text-gray-600 mb-2 text-left"
+              style={{
+                color: '#4b5563',
+                marginBottom: '0.5rem',
+                textAlign: 'left'
+              }}
+            >
               Flashcard {currentFlashcard + 1} of {video.flashcards.length}
             </p>
-            <p className="py-6 text-lg text-left">{video.flashcards[currentFlashcard]?.content}</p>
-            <p className="text-sm text-gray-500 text-left">
+            <p
+              className="py-6 text-lg text-left"
+              style={{
+                paddingTop: '1.5rem',
+                paddingBottom: '1.5rem',
+                fontSize: '1.125rem',
+                textAlign: 'left'
+              }}
+            >
+              {video.flashcards[currentFlashcard]?.content}
+            </p>
+            <p
+              className="text-sm text-gray-500 text-left"
+              style={{
+                fontSize: '0.875rem',
+                color: '#6b7280',
+                textAlign: 'left'
+              }}
+            >
               Start: {formatTime(video.flashcards[currentFlashcard].startTime)} - End:{" "}
               {formatTime(video.flashcards[currentFlashcard].endTime)}
             </p>
             <button
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                color: '#6b7280',
+                cursor: 'pointer'
+              }}
               onClick={() => setCurrentFlashcard(null)}
             >
               Close
             </button>
-            <div className="flex justify-between items-center mt-4">
+            <div
+              className="flex justify-between items-center mt-4"
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginTop: '1rem'
+              }}
+            >
               <div
                 className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full cursor-pointer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '9999px',
+                  cursor: 'pointer'
+                }}
                 onClick={handlePreviousFlashcard}
               >
-                <ChevronLeftIcon className="w-6 h-6 text-gray-700" />
+                <ChevronLeftIcon
+                  className="w-6 h-6 text-gray-700"
+                  style={{
+                    width: '1.5rem',
+                    height: '1.5rem',
+                    color: '#374151'
+                  }}
+                />
               </div>
               <div
                 className="flex items-center justify-center w-10 h-10 bg-gray-200 rounded-full cursor-pointer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '2.5rem',
+                  height: '2.5rem',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '9999px',
+                  cursor: 'pointer'
+                }}
                 onClick={handleNextFlashcard}
               >
-                <ChevronRightIcon className="w-6 h-6 text-gray-700" />
+                <ChevronRightIcon
+                  className="w-6 h-6 text-gray-700"
+                  style={{
+                    width: '1.5rem',
+                    height: '1.5rem',
+                    color: '#374151'
+                  }}
+                />
               </div>
             </div>
           </div>
