@@ -38,7 +38,24 @@ const FlashcardDetails: React.FC = () => {
         const response = await axios.get(`/youtube/${videoId}`, {
           withCredentials: true,
         });
-        console.log(response.data); // Inspect the response
+        console.log("Video data received:", response.data);
+
+        // Debug flashcard data
+        if (response.data && response.data.flashcards && response.data.flashcards.length > 0) {
+          console.log("First flashcard debug:");
+          console.log("content:", response.data.flashcards[0].content);
+          console.log("startTime:", response.data.flashcards[0].startTime,
+                     "type:", typeof response.data.flashcards[0].startTime);
+          console.log("endTime:", response.data.flashcards[0].endTime,
+                     "type:", typeof response.data.flashcards[0].endTime);
+
+          // Log all flashcards to check content
+          console.log("All flashcards content check:");
+          response.data.flashcards.forEach((card: any, index: number) => {
+            console.log(`Flashcard ${index}: content=${card.content ? 'present' : 'missing'}`);
+          });
+        }
+
         setVideo(response.data);
       } catch (err) {
         console.error("Error fetching video details:", err);
@@ -47,9 +64,9 @@ const FlashcardDetails: React.FC = () => {
         setLoading(false);
       }
     };
-  
+
     fetchVideoDetails();
-  }, [videoId]);  
+  }, [videoId]);
 
   // Handle video and flashcards deletion
   const handleDelete = async () => {
@@ -81,20 +98,49 @@ const FlashcardDetails: React.FC = () => {
     }
   };
 
-  // Convert milliseconds to formatted time string (HH:MM:SS)
-  const formatTime = (ms: number) => {
-  if (typeof ms !== "number" || isNaN(ms)) {
-    console.error("Invalid time value:", ms);
-    return "00:00:00"; // Default fallback
-  }
+  // Convert time value to formatted time string (HH:MM:SS)
+  const formatTime = (timeValue: any) => {
+    console.log("Formatting time value:", timeValue, "type:", typeof timeValue);
 
-  const totalSeconds = Math.floor(ms / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+    // Handle invalid values
+    if (timeValue === undefined || timeValue === null) {
+      console.error("Missing time value");
+      return "00:00:00";
+    }
 
-  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-};
+    // Convert string to number if needed
+    let numericValue: number;
+    if (typeof timeValue === 'string') {
+      numericValue = parseFloat(timeValue);
+    } else if (typeof timeValue === 'number') {
+      numericValue = timeValue;
+    } else {
+      console.error("Invalid time value type:", typeof timeValue);
+      return "00:00:00";
+    }
+
+    if (isNaN(numericValue)) {
+      console.error("Invalid time value (NaN):", timeValue);
+      return "00:00:00";
+    }
+
+    // Determine if the value is in seconds or milliseconds
+    // If the value is very large, assume it's in milliseconds
+    let totalSeconds: number;
+    if (numericValue > 10000) { // Likely milliseconds
+      totalSeconds = Math.floor(numericValue / 1000);
+      console.log("Converting from milliseconds:", numericValue, "to seconds:", totalSeconds);
+    } else { // Likely already in seconds
+      totalSeconds = Math.floor(numericValue);
+      console.log("Using value as seconds:", totalSeconds);
+    }
+
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
 
   // Loading state UI
   if (loading) {
@@ -223,9 +269,9 @@ const FlashcardDetails: React.FC = () => {
               onClick={() => setCurrentFlashcard(index)}
             >
               <p>{flashcard.content}</p>
-              {/* <p className="text-sm text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 mt-2">
                 Start: {formatTime(flashcard.startTime)} - End: {formatTime(flashcard.endTime)}
-              </p> */}
+              </p>
             </div>
           ))
         ) : (
@@ -287,7 +333,7 @@ const FlashcardDetails: React.FC = () => {
             >
               {video.flashcards[currentFlashcard]?.content}
             </p>
-            {/* <p
+            <p
               className="text-sm text-gray-500 text-left"
               style={{
                 fontSize: '0.875rem',
@@ -297,7 +343,7 @@ const FlashcardDetails: React.FC = () => {
             >
               Start: {formatTime(video.flashcards[currentFlashcard].startTime)} - End:{" "}
               {formatTime(video.flashcards[currentFlashcard].endTime)}
-            </p> */}
+            </p>
             <button
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
               style={{
