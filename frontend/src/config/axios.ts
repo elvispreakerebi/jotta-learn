@@ -1,11 +1,12 @@
 import axios from 'axios';
 
 // Determine if we're in development or production
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 // Create axios instance with custom config
 const axiosInstance = axios.create({
   // Use localhost for development if needed
-  baseURL: 'http://localhost:5000',
+  baseURL: isDevelopment ? 'http://localhost:5000' : 'https://jotta.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
