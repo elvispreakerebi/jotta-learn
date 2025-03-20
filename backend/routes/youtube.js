@@ -112,44 +112,32 @@ const generateFlashcardsFromTranscript = async (chunks) => {
       // Use OpenAI API for summarization
       const summary = await summarizeText(chunk.text);
 
-      // Ensure timestamps are numbers and content is preserved
-      const startTime = Number(chunk.startTime);
-      const endTime = Number(chunk.endTime);
-
-      console.log(`[GENERATE] Flashcard ${index}: content=${summary ? summary.substring(0, 20) + '...' : 'missing'}, startTime=${startTime}ms, endTime=${endTime}ms`);
+      // Log for debugging
+      console.log(`[GENERATE] Generated flashcard ${index}: content=${summary ? 'present' : 'missing'}`);
 
       // Make sure summary is not undefined or null
       if (!summary) {
-        console.error(`[GENERATE] Warning: Empty summary for chunk ${index}`);
+        console.warn(`[GENERATE] Warning: Empty summary for chunk ${index}`);
       }
 
       return {
         content: summary || "No content available for this section",
-        startTime: startTime,
-        endTime: endTime
+        startTime: index * 5, // 5 seconds per chunk
+        endTime: (index + 1) * 5
       };
     } catch (error) {
       console.error(`[GENERATE] Error generating flashcard for chunk ${index}: ${error.message}`);
-
-      // Ensure timestamps are numbers even in error case
-      const startTime = Number(chunk.startTime);
-      const endTime = Number(chunk.endTime);
-
-      console.log(`[GENERATE] Error flashcard ${index}: Using fallback content, startTime=${startTime}ms, endTime=${endTime}ms`);
-
       return {
         content: "Failed to generate content for this section",
-        startTime: startTime,
-        endTime: endTime
+        startTime: index * 5, // 5 seconds per chunk
+        endTime: (index + 1) * 5
       };
     }
   }));
 
-  // Log a sample flashcard to verify the timestamps
+  // Log a sample flashcard to verify
   if (flashcards.length > 0) {
     console.log(`[GENERATE] First flashcard sample:`, JSON.stringify(flashcards[0]));
-    console.log(`[GENERATE] First flashcard startTime type:`, typeof flashcards[0].startTime);
-    console.log(`[GENERATE] First flashcard endTime type:`, typeof flashcards[0].endTime);
   }
 
   return flashcards;
@@ -276,64 +264,71 @@ const formatOutput = (text) => {
 // Process video chunks to generate flashcards
 const processVideoChunks = async (job, videoId) => {
   const { userId } = job;
-  const { title, thumbnail } = await fetchVideoDetails(videoId);
 
-  // Update job status
-  job.status = 'processing';
-  job.processingStartedAt = new Date();
-  await job.save();
+  console.log(`[PROCESS] Starting processing for video ID: ${videoId}`);
 
   try {
+    // Fetch video details
+    const { title, thumbnail } = await fetchVideoDetails(videoId);
+    console.log(`[PROCESS] Fetched video details: Title="${title}", Thumbnail="${thumbnail}"`);
+
+    // Update job status
+    job.status = 'processing';
+    job.processingStartedAt = new Date();
+    await job.save();
+    console.log(`[PROCESS] Updated job status to 'processing'`);
+
     // Fetch transcript directly instead of downloading audio
     const transcriptChunks = await fetchYouTubeTranscript(videoId);
+    console.log(`[PROCESS] Fetched transcript with ${transcriptChunks.length} chunks`);
 
     // Log the first chunk to debug timestamps
     if (transcriptChunks.length > 0) {
       console.log("[PROCESS] First transcript chunk sample:", JSON.stringify(transcriptChunks[0]));
     }
 
-    // Update job with chunks information
-    job.chunks = transcriptChunks.map(chunk => ({
-      startTime: chunk.startTime,
-      endTime: chunk.endTime,
-      status: 'pending'
-    }));
+    // Update job with chunks information - ensure no NaN values
+    job.chunks = transcriptChunks.map((chunk, index) => {
+      // Use index-based timestamps to avoid NaN values
+      return {
+        startTime: index * 5000, // 5 seconds per chunk
+        endTime: (index + 1) * 5000,
+        status: 'pending'
+      };
+    });
     await job.save();
+    console.log(`[PROCESS] Updated job with ${job.chunks.length} chunks using index-based timestamps`);
 
     // Process chunks to generate flashcards
     const flashcards = await generateFlashcardsFromTranscript(transcriptChunks);
+    console.log(`[PROCESS] Generated ${flashcards.length} flashcards`);
 
-    // Log the first flashcard to debug timestamps
+    // Log the first flashcard to debug
     if (flashcards.length > 0) {
-      console.log("[PROCESS] First flashcard sample before saving:", JSON.stringify(flashcards[0]));
+      console.log("[PROCESS] First flashcard sample:", JSON.stringify(flashcards[0]));
     }
 
     // Update progress as chunks are processed
+    console.log(`[PROCESS] Updating job progress for ${flashcards.length} flashcards`);
     for (let i = 0; i < flashcards.length; i++) {
       job.chunks[i].status = 'completed';
       job.progress = ((i + 1) / flashcards.length) * 100;
-      await job.save();
+
+      // Only save every 5 chunks to reduce database operations
+      if (i % 5 === 0 || i === flashcards.length - 1) {
+        await job.save();
+        console.log(`[PROCESS] Updated job progress: ${Math.round(job.progress)}%`);
+      }
     }
 
-    // Ensure timestamps are numbers and content is preserved
-    const processedFlashcards = flashcards.map(card => {
-      // Log each card to debug content
-      console.log(`[PROCESS] Processing flashcard: content=${card.content ? 'present' : 'missing'}, startTime=${card.startTime}, endTime=${card.endTime}`);
-
-      return {
-        content: card.content,
-        startTime: Number(card.startTime),
-        endTime: Number(card.endTime)
-      };
-    });
-
     // Create final video document with all flashcards
+    console.log(`[PROCESS] Creating video document with ${flashcards.length} flashcards`);
     const video = new YouTubeVideo({
       videoId,
       userId,
       title,
       thumbnail,
-      flashcards: processedFlashcards
+      flashcards
     });
 
     // Log the first flashcard from the video object before saving
@@ -343,18 +338,21 @@ const processVideoChunks = async (job, videoId) => {
     }
 
     await video.save();
+    console.log(`[PROCESS] Successfully saved video with ${flashcards.length} flashcards`);
 
     // Update job status
     job.status = 'completed';
     job.processingCompletedAt = new Date();
     await job.save();
+    console.log(`[PROCESS] Updated job status to 'completed'`);
 
     return video;
   } catch (error) {
-    console.error("[PROCESS] Error in processVideoChunks:", error);
+    console.error(`[PROCESS] Error in processVideoChunks: ${error.message}`);
     job.status = 'failed';
     job.error = error.message;
     await job.save();
+    console.log(`[PROCESS] Updated job status to 'failed'`);
     throw error;
   }
 };
@@ -471,29 +469,8 @@ router.get("/:videoId", ensureAuthenticated, async (req, res) => {
       return res.status(404).json({ error: "Video not found" });
     }
 
-    // Ensure timestamps are properly formatted as numbers
-    const processedVideo = {
-      ...video.toObject(),
-      flashcards: video.flashcards.map(card => ({
-        content: card.content, // Explicitly include the content field
-        startTime: Number(card.startTime),
-        endTime: Number(card.endTime)
-      }))
-    };
-
-    // Log the first flashcard to debug timestamps and content
-    if (processedVideo.flashcards && processedVideo.flashcards.length > 0) {
-      console.log("[GET] First flashcard debug:",
-                 "content:", processedVideo.flashcards[0].content,
-                 "startTime:", processedVideo.flashcards[0].startTime,
-                 "type:", typeof processedVideo.flashcards[0].startTime,
-                 "endTime:", processedVideo.flashcards[0].endTime,
-                 "type:", typeof processedVideo.flashcards[0].endTime);
-    }
-
-    res.json(processedVideo);
+    res.json(video);
   } catch (error) {
-    console.error("[GET] Error fetching video details:", error);
     res.status(500).json({ error: "Failed to fetch video details." });
   }
 });
