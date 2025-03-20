@@ -1,6 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const YouTubeVideo = require("../models/YouTubeVideo");
+const YouTubeVideo = require("../models/YoutubeVideo");
 const VideoProcessingJob = require("../models/VideoProcessingJob");
 const ensureAuthenticated = require("../middleware/ensureAuthenticated");
 
