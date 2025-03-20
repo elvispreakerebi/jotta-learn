@@ -6,7 +6,7 @@ import reportWebVitals from "./reportWebVitals";
 import axios from "axios";
 
 // Set Axios defaults based on the environment
-axios.defaults.baseURL = "http://localhost:5000";
+axios.defaults.baseURL = "https://jotta.onrender.com";
 // axios.defaults.baseURL = process.env.NODE_ENV === "production"
 //   ? "https://jotta.onrender.com"  // Update this to your backend URL
 //   : "http://localhost:5000";
