@@ -223,9 +223,9 @@ const FlashcardDetails: React.FC = () => {
               onClick={() => setCurrentFlashcard(index)}
             >
               <p>{flashcard.content}</p>
-              <p className="text-sm text-gray-500 mt-2">
+              {/* <p className="text-sm text-gray-500 mt-2">
                 Start: {formatTime(flashcard.startTime)} - End: {formatTime(flashcard.endTime)}
-              </p>
+              </p> */}
             </div>
           ))
         ) : (
@@ -287,7 +287,7 @@ const FlashcardDetails: React.FC = () => {
             >
               {video.flashcards[currentFlashcard]?.content}
             </p>
-            <p
+            {/* <p
               className="text-sm text-gray-500 text-left"
               style={{
                 fontSize: '0.875rem',
@@ -297,7 +297,7 @@ const FlashcardDetails: React.FC = () => {
             >
               Start: {formatTime(video.flashcards[currentFlashcard].startTime)} - End:{" "}
               {formatTime(video.flashcards[currentFlashcard].endTime)}
-            </p>
+            </p> */}
             <button
               className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
               style={{
