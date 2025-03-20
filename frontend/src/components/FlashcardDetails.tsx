@@ -123,13 +123,13 @@ const FlashcardDetails: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fixed Top Section */}
-      <div className="w-full fixed top-0 bg-white shadow-sm z-10 flex justify-between items-center px-6 py-3">
-        <div className="flex items-center space-x-4 mr-2">
+      <div className="fixed top-0 right-0 left-0 bg-white shadow-sm z-10 flex space-x-4 items-center px-6 py-3">
+        <div className="flex w-full items-center space-x-4">
           <ArrowLeftIcon
             className="w-6 h-6 cursor-pointer text-gray-800"
             onClick={() => navigate("/dashboard")}
           />
-          <h1 className="text-lg font-semibold text-gray-800">{video?.title || "Loading..."}</h1>
+          <h1 className="text-lg font-semibold text-gray-800 w-full truncate">{video?.title || "Loading..."}</h1>
         </div>
         <Trash2Icon
           className="w-6 h-6 cursor-pointer text-red-600"
@@ -164,7 +164,7 @@ const FlashcardDetails: React.FC = () => {
       )}
 
       {/* Grid layout for displaying flashcard previews */}
-      <div className="mt-16 px-6 py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="mt-16 px-6 py-16 sm:py-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {video?.flashcards.length ? (
           video.flashcards.map((flashcard, index) => (
             <div

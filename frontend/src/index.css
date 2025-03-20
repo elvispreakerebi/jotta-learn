@@ -96,6 +96,10 @@ code {
   color: var(--color-blue-600);
 }
 
+.text-red-600 {
+  color: var(--color-red-600);
+}
+
 .underline {
   text-decoration: underline;
 }
@@ -262,6 +266,16 @@ code {
   padding-bottom: var(--spacing-4);
 }
 
+.py-8 {
+  padding-top: var(--spacing-8);
+  padding-bottom: var(--spacing-8);
+}
+
+.py-16 {
+  padding-top: var(--spacing-16);
+  padding-bottom: var(--spacing-16);
+}
+
 .py-72 {
   padding-top: var(--spacing-72);
   padding-bottom: var(--spacing-72);
@@ -297,6 +311,12 @@ code {
 
 .gap-4 {
   gap: var(--spacing-4);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* Hover States */
@@ -565,4 +585,8 @@ code {
 
 .right-0 {
   right: 0;
+}
+
+.left-0 {
+  left: 0;
 }
