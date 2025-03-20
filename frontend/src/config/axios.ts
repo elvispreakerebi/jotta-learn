@@ -1,8 +1,12 @@
 import axios from 'axios';
 
+// Determine if we're in development or production
+const isDevelopment = process.env.NODE_ENV === 'development';
+
 // Create axios instance with custom config
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000',
+  // Use localhost for development if needed
+  baseURL: isDevelopment ? 'http://localhost:5000' : 'https://jotta.onrender.com',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -13,7 +17,12 @@ const axiosInstance = axios.create({
 // Add a request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // You can add any custom headers here if needed
+    // Check if we have a token in localStorage (fallback for when cookies don't work)
+    const token = localStorage.getItem('authToken');
+    if (token && config.headers) {
+      // Add the token to the Authorization header
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
@@ -28,6 +37,14 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
+      console.log('Authentication error detected, redirecting to login');
+
+      // Clear any stored tokens
+      localStorage.removeItem('authToken');
+
+      // Remove the Authorization header
+      delete axiosInstance.defaults.headers.common['Authorization'];
+
       // Redirect to login page on authentication error
       window.location.href = '/';
     }

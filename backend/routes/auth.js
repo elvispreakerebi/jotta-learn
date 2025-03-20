@@ -33,10 +33,15 @@ router.post("/register", async (req, res) => {
 
     // Generate token and set cookie
     const token = generateToken(user._id);
+
+    // Determine if we're in development or production
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    // Configure cookie settings based on environment
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProduction, // Only use secure in production
+      sameSite: isProduction ? "none" : "lax", // Use "none" for cross-site in production, "lax" for development
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 
@@ -76,10 +81,15 @@ router.post("/login", async (req, res) => {
 
     // Generate token and set cookie
     const token = generateToken(user._id);
+
+    // Determine if we're in development or production
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    // Configure cookie settings based on environment
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      secure: isProduction, // Only use secure in production
+      sameSite: isProduction ? "none" : "lax", // Use "none" for cross-site in production, "lax" for development
       maxAge: 24 * 60 * 60 * 1000 // 24 hours
     });
 

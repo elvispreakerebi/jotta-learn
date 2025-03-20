@@ -22,15 +22,27 @@ const Home = () => {
     try {
       const endpoint = isLogin ? "/auth/login" : "/auth/register";
       const response = await axiosInstance.post(endpoint, formData);
-      
+
       if (isLogin) {
+        // Store the token in localStorage as a fallback for environments where cookies don't work
+        if (response.data.token) {
+          localStorage.setItem('authToken', response.data.token);
+          // Add the token to axios default headers for subsequent requests
+          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+        }
+
         toast.success(response.data.message);
-        navigate("/dashboard");
+
+        // Add a small delay to ensure cookie/token is properly set before navigation
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 300);
       } else {
         toast.success("Registration successful! Please login.");
         setIsLogin(true);
       }
     } catch (error: any) {
+      console.error("Authentication error:", error);
       toast.error(error.response?.data?.message || "An error occurred");
     }
   };
