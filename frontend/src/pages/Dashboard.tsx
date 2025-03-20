@@ -215,7 +215,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header with user info and controls */}
       <div className="w-full fixed top-0 bg-white shadow-sm" style={{ zIndex: 10 }}>
-        <div className="flex justify-between items-center px-4 py-3">
+        <div className="flex justify-between items-center px-4">
           <h1 className="text-2xl font-bold text-gray-800">Jotta</h1>
           <div className="flex items-center space-x-4">
             {user && (
