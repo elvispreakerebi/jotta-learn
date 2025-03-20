@@ -180,18 +180,16 @@ const Dashboard = () => {
               toast.error(status.error || "Failed to generate flashcards.");
               setYoutubeUrl("");
             } else {
-              // Update progress based on job status
-              setProgress(status.progress || Math.min(progress + 1, 99));
+              // Only update progress when we have a valid progress value from backend
+              if (status.progress !== undefined) {
+                setProgress(status.progress);
+              }
             }
-          } else {
-            setProgress((prev) => Math.min(prev + 1, 99));
           }
+          // Don't update progress when no status is available
         } catch (error: any) {
           console.error("Error checking video status:", error);
-          // Don't stop polling on network errors
-          if (error.code !== 'ECONNABORTED') {
-            setProgress((prev) => Math.min(prev + 1, 99));
-          }
+          // Don't update progress on network errors
         }
       }, 2000);
   
@@ -267,12 +265,13 @@ const Dashboard = () => {
             </button>
           </div>
           {isGenerating && (
-            <div className="w-full bg-gray-200 rounded-lg mt-4">
-              <div
-                className="bg-blue-600 text-xs font-medium text-white text-center p-1 rounded-lg"
-                style={{ width: `${progress}%` }}
-              >
-                {progress}%
+            <div className="w-full">
+              <div className="w-full bg-gray-200 rounded-lg mt-4">
+                <div
+                  className="bg-blue-600 text-xs font-medium text-white text-center p-1 rounded-lg"
+                  style={{ width: `${progress}%` }}
+                >
+                </div>
               </div>
             </div>
           )}

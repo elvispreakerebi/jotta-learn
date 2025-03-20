@@ -72,6 +72,10 @@ code {
   background-color: var(--color-gray-50);
 }
 
+.bg-gray-200 {
+  background-color: var(--color-gray-200);
+}
+
 .bg-white {
   background-color: var(--color-white);
 }
@@ -337,6 +341,11 @@ code {
   .sm\:py-56 {
     padding-top: var(--spacing-56);
     padding-bottom: var(--spacing-56);
+  }
+
+  .sm\:px-16 {
+    padding-left: var(--spacing-16);
+    padding-right: var(--spacing-16);
   }
 
   .sm\:grid-cols-2 {
