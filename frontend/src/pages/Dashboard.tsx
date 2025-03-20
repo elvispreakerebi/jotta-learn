@@ -7,11 +7,13 @@ import axiosInstance from "../config/axios";
 import YoutubeVideoCard from "../components/YoutubeVideoCard";
 import "react-toastify/dist/ReactToastify.css";
 
+// User interface for authentication and display
 interface User {
   name: string;
   email: string;
 }
 
+// Video data structure for saved flashcards
 interface SavedVideo {
   videoId: string;
   title: string;
@@ -19,6 +21,7 @@ interface SavedVideo {
   description: string;
 }
 
+// Main dashboard component for managing YouTube video flashcards
 const Dashboard = () => {
   const navigate = useNavigate();
 
@@ -62,6 +65,7 @@ const Dashboard = () => {
     };
   }, [pollingInterval, navigate]);
 
+  // Retrieve user's saved video flashcards
   const fetchSavedVideos = async () => {
     try {
       const videosResponse = await axiosInstance.get("/youtube/saved-videos");
@@ -72,6 +76,7 @@ const Dashboard = () => {
     }
   };
 
+  // Check if flashcards already exist for a video
   const checkVideoExists = async (videoId: string) => {
     try {
       const response = await axiosInstance.get(`/youtube/${videoId}`, {
@@ -90,6 +95,7 @@ const Dashboard = () => {
     }
   };
 
+  // Monitor flashcard generation progress
   const checkVideoStatus = async (videoId: string) => {
     try {
       const response = await axiosInstance.get(`/youtube/job/${videoId}`);
@@ -102,6 +108,7 @@ const Dashboard = () => {
     }
   };
 
+  // Handle user logout and session cleanup
   const handleLogout = async () => {
     try {
       await axiosInstance.post("/auth/logout");
@@ -112,6 +119,7 @@ const Dashboard = () => {
     }
   };
 
+  // Process YouTube video URL and initiate flashcard generation
   const handleGenerate = async () => {
     if (isGenerating) {
       try {
@@ -205,6 +213,7 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Header with user info and controls */}
       <div className="w-full fixed top-0 bg-white shadow-sm" style={{ zIndex: 10 }}>
         <div className="flex justify-between items-center px-4 py-3">
           <h1 className="text-2xl font-bold text-gray-800">Jotta</h1>
@@ -278,6 +287,7 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Main content area with video cards */}
       <div className="px-6 py-72 sm:py-56">
         {isLoading ? (
           <div className="flex justify-center items-center" style={{ height: "8rem" }}>

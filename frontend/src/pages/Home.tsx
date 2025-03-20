@@ -3,15 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import axiosInstance from "../config/axios";
 
+// Home component handles user authentication (login/register)
 const Home = () => {
+  // Navigation hook for redirecting after authentication
   const navigate = useNavigate();
-  const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
+  
+  // State management
+  const [isLogin, setIsLogin] = useState(true); // Toggle between login and register
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [formData, setFormData] = useState({ // Form data for auth
     email: "",
     password: "",
   });
 
+  // Handle form submission for both login and register
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -30,6 +35,7 @@ const Home = () => {
     }
   };
 
+  // Handle input field changes and update form state
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -38,8 +44,10 @@ const Home = () => {
   };
 
   return (
+    // Main container with centered content
     <div className="flex items-center justify-center min-h-screen">
       <div className="w-full max-w-md p-4">
+        {/* Header section with app title and description */}
         <div className="text-center">
           <h1 className="text-4xl font-bold text-black mb-2">Welcome to Jotta</h1>
           <p className="text-gray-800 text-base mb-6">
@@ -47,6 +55,7 @@ const Home = () => {
           </p>
         </div>
 
+        {/* Authentication form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-800">
@@ -97,6 +106,7 @@ const Home = () => {
           </button>
         </form>
 
+        {/* Toggle between login and register modes */}
         {isLogin ? (
           <div className="text-center mt-4">
             <button
