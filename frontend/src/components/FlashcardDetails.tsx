@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../config/axios";
 import {
   Trash2Icon,
   ArrowLeftIcon,
@@ -35,7 +35,7 @@ const FlashcardDetails: React.FC = () => {
   useEffect(() => {
     const fetchVideoDetails = async () => {
       try {
-        const response = await axios.get(`/youtube/${videoId}`, {
+        const response = await axiosInstance.get(`/youtube/${videoId}`, {
           withCredentials: true,
         });
         console.log(response.data); // Inspect the response
@@ -55,7 +55,7 @@ const FlashcardDetails: React.FC = () => {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await axios.delete(`/youtube/${videoId}`, {
+      await axiosInstance.delete(`/youtube/${videoId}`, {
         withCredentials: true,
       });
       navigate("/dashboard");
