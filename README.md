@@ -15,20 +15,18 @@ An interactive learning platform for creating and managing YouTube video flashca
 ## Technology Stack
 - **Frontend**: React, TypeScript, Tailwind CSS
 - **Backend**: Node.js, Express, MongoDB
-- **AI Integration**: OpenAI API
-- **DevOps**: Docker, GitHub Actions
+- **AI Integration**: Hugging Face API
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js v18+
 - MongoDB v6+
-- Python 3.9+ (for optional ML features)
 
 ### Installation
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/jotta-learn.git
+git clone https://github.com/elvispreakerebi/jotta-learn.git
 cd jotta-learn
 
 # Install backend dependencies
@@ -45,7 +43,7 @@ npm install
 ```env
 MONGODB_URI=mongodb://localhost:27017/jotta-learn
 JWT_SECRET=your_jwt_secret
-OPENAI_API_KEY=your_openai_key
+HUGGINGFACE_API_KEY=your_huggingface_key
 ```
 
 ## Running the Application
@@ -60,7 +58,7 @@ npm start
 ```
 
 ## API Documentation
-Our API endpoints follow RESTful principles. Explore the API documentation at [http://localhost:5000/api-docs](http://localhost:5000/api-docs) when the backend server is running.
+Our API endpoints follow RESTful principles. Explore the API documentation at [http://localhost:5000/](http://localhost:5000/) when the backend server is running.
 
 ## Deployment
 ```bash
